@@ -1,0 +1,81 @@
+#include<iostream>
+#include<string>
+#include<vector>
+#include<queue>
+#include<algorithm>
+using namespace std;
+
+int n;		// 지도의 크기
+bool visited[30][30] = { 0 };		// 해당 집을 방문 처리했는지 확인
+int check[30][30];		// 지도의 정보를 저장
+int dir[4][2] = { {-1, 0}, {1, 0}, {0, 1}, {0, -1} };		// 네 방향 탐색
+vector<int> apartment;	// 단지에 속하는 집의 수를 저장
+
+bool isInside(int a, int b);
+void bfs();
+
+int main() {
+	cin.tie(NULL);
+	ios::sync_with_stdio(false);
+
+	// 지도의 크기를 받음. 그리고 지도의 정보를 받음
+	cin >> n;
+	string map;
+	for (int i = 1; i <= n; i++) {
+		cin >> map;
+		for (int j = 1; j <= n; j++) {
+			check[i][j] = map[j - 1] - '0';	// 입력이 붙어서 들어오기 때문에 string 형식으로 받고 짤라서 check배열에 넣는다
+		}
+	}
+
+	// 해당 지도에 대해 bfs를 수행
+	bfs();
+	return 0;
+}
+
+bool isInside(int a, int b) {
+	return (a > 0 && a <= n) && (b > 0 && b <= n);
+}
+
+void bfs() {
+	queue<pair<int, int> > q;
+
+	// 지도의 모든 부분을 탐색
+	for (int i = 1; i <= n; i++) {
+		for (int j = 1; j <= n; j++) {
+			// 방문하지 않았고 집이 있는 부분을 탐색
+			if (!visited[i][j] && check[i][j] == 1) {
+				int num = 1;
+				visited[i][j] = true;
+				q.push(make_pair(i, j));		// 첫 스타트 집을 큐에 push
+
+				while (!q.empty()) {
+					int cur_y = q.front().first;
+					int cur_x = q.front().second;
+					q.pop();
+
+					// 네방향 탐색
+					for (int i = 0; i < 4; i++) {
+						int next_y = cur_y + dir[i][0];
+						int next_x = cur_x + dir[i][1];
+
+						//	지도 안에 있으며 아직 방문처리 하지 않은 집을 방문하며 단지 형성
+						if (isInside(next_y, next_x) && !visited[next_y][next_x] && check[next_y][next_x] == 1) {
+							visited[next_y][next_x] = true;
+							q.push(make_pair(next_y, next_x));
+							num += 1;
+						}
+					}
+				}
+				apartment.push_back(num);
+			}
+		}
+	}
+
+	// 출력
+	sort(apartment.begin(), apartment.end());
+	cout << apartment.size() << "\n";
+	for (int i = 0; i < apartment.size(); i++) {
+		cout << apartment[i] << "\n";
+	}
+}
