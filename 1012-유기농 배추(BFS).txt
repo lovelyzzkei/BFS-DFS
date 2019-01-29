@@ -1,0 +1,89 @@
+#include<iostream>
+#include<vector>
+#include<queue>
+using namespace std;
+
+int m;		// 지도의 가로
+int n;			// 지도의 세로
+int k;			// 배추가 심어져 있는 위치의 개수
+bool visited[51][51] = { 0 };		// 해당 집을 방문 처리했는지 확인
+int check[51][51] = { 0 };		// 지도의 정보를 저장
+int dir[4][2] = { {-1, 0}, {1, 0}, {0, 1}, {0, -1} };		// 네 방향 탐색
+
+bool isInside(int a, int b);
+void bfs();
+
+int main() {
+	cin.tie(NULL);
+	ios::sync_with_stdio(false);
+
+	// 테스트 케이스의 수
+	int t;
+	cin >> t;
+	for (int q = 0; q < t; q++) {
+		// 지도의 크기를 받음. 그리고 지도의 정보를 받음
+		cin >> m >> n >> k;
+
+		// check배열과 visited배열을 초기화
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < m; j++) {
+				visited[i][j] = false;
+				check[i][j] = 0;
+			}
+		}
+
+		int a, b;		// 배추의 좌표
+		for (int i = 0; i < k; i++){
+			cin >> a >> b;
+			check[b][a] = 1;
+		}
+
+		// 해당 지도에 대해 bfs를 수행
+		bfs();
+	}
+	return 0;
+}
+
+bool isInside(int a, int b) {
+	return (a >= 0 && a < n) && (b >= 0 && b < m);
+}
+
+void bfs() {
+	vector<int> apartment;
+	queue<pair<int, int> > q;
+
+	// 지도의 모든 부분을 탐색
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			// 방문하지 않았고 집이 있는 부분을 탐색
+			if (!visited[i][j] && check[i][j] == 1) {
+				int num = 1;
+				visited[i][j] = true;
+				q.push(make_pair(i, j));		// 첫 스타트 집을 큐에 push
+
+				while (!q.empty()) {
+					int cur_y = q.front().first;
+					int cur_x = q.front().second;
+					q.pop();
+
+					// 네방향 탐색
+					for (int p = 0; p < 4; p++) {
+						int next_y = cur_y + dir[p][0];
+						int next_x = cur_x + dir[p][1];
+
+						//	지도 안에 있으며 아직 방문처리 하지 않은 집을 방문하며 단지 형성
+						if (isInside(next_y, next_x) && !visited[next_y][next_x] && check[next_y][next_x] == 1) {
+							visited[next_y][next_x] = true;
+							q.push(make_pair(next_y, next_x));
+							num += 1;
+						}
+					}
+				}
+				apartment.push_back(num);
+			}
+		}
+	}
+
+	// 출력
+	cout << apartment.size() << "\n";
+}
