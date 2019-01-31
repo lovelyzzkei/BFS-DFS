@@ -1,0 +1,90 @@
+#include<iostream>
+#include<queue>
+#include<algorithm>
+#define MAX 101
+using namespace std;
+
+int n;		// 가로
+int m;	// 세로
+int INF = 1000000000;
+int check[MAX][MAX];
+bool visited[MAX][MAX];
+int dir[4][2] = { {-1, 0}, {1, 0}, {0, 1}, {0, -1} };		// 네방향 탐색
+vector<int> v;		// 분리된 영역을 담기 위한 벡터
+
+bool isInside(int a, int b);
+void bfs(int i, int j);
+
+int main() {
+	cin.tie(NULL);
+	ios::sync_with_stdio(false);
+
+	// 가로 세로 그리고 직사각형의 개수를 받음
+	int k;
+	cin >> m >> n >> k;
+
+	// check배열을 초기화
+	for (int i = 0; i < m; i++) {
+		for (int j = 0; j < n; j++) {
+			check[i][j] = 1;
+		}
+	}
+
+	for (int p = 0; p < k; p++) {
+		int x1, y1, x2, y2;	// 꼭짓점의 좌표를 받음
+		cin >> x1 >> y1 >> x2 >> y2;
+		for (int i = m - y2; i < m - y1; i++) {
+			for (int j = x1; j < x2; j++) {
+				check[i][j] = INF;		// 선언된 직사각형에 접근할 수 없도록 막음
+				visited[i][j] = true;
+			}
+		}
+	}
+
+	// 초기화 된 check배열에 대하여 방문처리 되지 않은 영역에 대하여 bfs를 수행
+	for (int i = 0; i < m; i++) {
+		for (int j = 0; j < n; j++) {
+			if (!visited[i][j]) {
+				bfs(i, j);
+			}
+		}
+	}
+
+	// 오름차순으로 영역을 출력
+	sort(v.begin(), v.end());
+	cout << v.size() << "\n";
+	for (int i = 0; i < v.size(); i++) {
+		cout << v[i] << " ";
+	}
+	cout << "\n";
+	return 0;
+}
+
+bool isInside(int a, int b) {
+	return (a >= 0 && a < m) && (b >= 0 && b < n);
+}
+void bfs(int i, int j) {
+	int area = 1;
+	queue<pair<int, int> >q;
+	q.push(make_pair(i, j));
+	visited[i][j] = true;
+
+	while (!q.empty()) {
+		int cur_y = q.front().first;
+		int cur_x = q.front().second;
+		q.pop();
+
+		// 네 방향 탐색
+		for (int i = 0; i < 4; i++) {
+			int next_y = cur_y + dir[i][0];
+			int next_x = cur_x + dir[i][1];
+			// 모눈종이 안에 있고 k개의 직사각형의 영역이 아니며 방문처리 되지 않은 영역이 있다면 그 영역을 추가
+			if (isInside(next_y, next_x) && check[next_y][next_x] == 1 && !visited[next_y][next_x]) {
+				area++;
+				visited[next_y][next_x] = true;
+				q.push(make_pair(next_y, next_x));
+			}
+		}
+	}
+	v.push_back(area);
+}
