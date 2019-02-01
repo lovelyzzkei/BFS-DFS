@@ -1,0 +1,91 @@
+#include<iostream>
+#include<queue>
+#define MAX 101
+using namespace std;
+
+int n;		// 지역의 가로와 세로
+int	 temp = 0;
+bool visited[MAX][MAX] = { 0, };		// 방문했는지 확인하기 위한 배열
+int check[MAX][MAX];		// 지역의 높이 정보를 담음
+int dir[4][2] = { {-1, 0}, {1, 0}, {0, 1}, {0, -1} };
+
+bool isInside(int a, int b);
+void bfs(int y, int x, int hei);
+
+int main() {
+	cin.tie(NULL);
+	ios::sync_with_stdio(false);
+
+	// 지역의 크기를 받음
+	cin >> n;
+
+	// 지역의 높이 정보를 받음
+	int height, max = 0, min = 1000000000;
+	for (int i = 1; i <= n; i++) {
+		for (int j = 1; j <= n; j++) {
+			cin >> height;
+			if (height > max) { max = height; }	// 지역의 최대 높이를 저장
+			if (height < min) { min = height; }		// 지역의 최소 높이를 저장
+			check[i][j] = height;
+		}
+	}
+
+	// 지역의 최대 높이까지 bfs를 수행. 잠긴 부분은 방문 처리를 하고 매 반복마다 visited배열을 초기화 해줌
+	// 장마철에 비가 오지 않는 경우도 있기 때문에 비의 높이를 0부터 시작
+	for (int p = 0; p <= max; p++) {
+		// visited배열의 초기화
+		for (int i = 1; i <= n; i++) {
+			for (int j = 1; j <= n; j++) {
+				if (check[i][j] <= p) {
+					visited[i][j] = true;
+				}
+				else {
+					visited[i][j] = false;
+				}
+			}
+		}
+
+		// bfs를 수행하면서 안전한 영역의 최대 개수를 구함
+		int count = 0;
+		for (int i = 1; i <= n; i++) {
+			for (int j = 1; j <= n; j++) {
+				if (!visited[i][j]) {
+					bfs(i, j, p);
+					count++;
+				}
+			}
+		}
+
+		if (count > temp) {
+			temp = count;
+		}
+	}
+
+	cout << temp << "\n";
+	return 0;
+}
+
+bool isInside(int a, int b) {
+	return (a > 0 && a <= n) && (b > 0 && b <= n);
+}
+
+void bfs(int y, int x, int hei) {
+	queue<pair<int, int> >q;
+	q.push(make_pair(y, x));
+	
+	while (!q.empty()) {
+		int cur_y = q.front().first;
+		int cur_x = q.front().second;
+		q.pop();
+
+		// 네방향 탐색
+		for (int i = 0; i < 4; i++) {
+			int next_y = cur_y + dir[i][0];
+			int next_x = cur_x + dir[i][1];
+			if (isInside(next_y, next_x) && !visited[next_y][next_x] && check[next_y][next_x] > hei) {
+				q.push(make_pair(next_y, next_x));
+				visited[next_y][next_x] = true;
+			}
+		}
+	}
+}
